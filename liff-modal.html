@@ -21,14 +21,14 @@
             justify-content: center;
         }
 
-        /* モーダルオーバーレイ（背景の暗い部分） */
+        /* モーダルオーバーレイ */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.75 );
             display: flex;
             align-items: center;
             justify-content: center;
@@ -38,12 +38,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* モーダルコンテンツ */
@@ -60,14 +56,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* 閉じるボタン */
@@ -104,7 +94,7 @@
             object-fit: cover;
         }
 
-        /* テキストエリア（オプション） */
+        /* テキストエリア */
         .modal-text {
             padding: 20px;
             text-align: center;
@@ -122,7 +112,7 @@
             line-height: 1.6;
         }
 
-        /* ボタンエリア（オプション） */
+        /* ボタンエリア */
         .modal-buttons {
             padding: 0 20px 20px;
             display: flex;
@@ -145,20 +135,6 @@
             color: white;
         }
 
-        .modal-btn.primary:hover {
-            background: #05b34c;
-            transform: translateY(-2px);
-        }
-
-        .modal-btn.secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .modal-btn.secondary:hover {
-            background: #e0e0e0;
-        }
-
         /* ローディング表示 */
         .loading {
             text-align: center;
@@ -173,31 +149,14 @@
             color: #f44336;
         }
 
-        /* 隠す */
         .hidden {
-            display: none;
+            display: none !important;
         }
 
-        /* スマホ対応 */
         @media (max-width: 480px) {
-            .modal-content {
-                border-radius: 15px;
-                max-height: 95vh;
-            }
-
-            .modal-text h2 {
-                font-size: 20px;
-            }
-
-            .modal-text p {
-                font-size: 14px;
-            }
-
-            .close-btn {
-                width: 35px;
-                height: 35px;
-                font-size: 20px;
-            }
+            .modal-content { border-radius: 15px; max-height: 95vh; }
+            .modal-text h2 { font-size: 20px; }
+            .modal-text p { font-size: 14px; }
         }
     </style>
 </head>
@@ -215,19 +174,14 @@
     <!-- モーダルウィンドウ -->
     <div id="modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <!-- 閉じるボタン -->
             <button class="close-btn" onclick="closeModal()">×</button>
-            
-            <!-- 画像 -->
             <img id="modalImage" class="modal-image" src="" alt="イベント画像">
             
-            <!-- テキスト（オプション） -->
             <div id="modalText" class="modal-text hidden">
                 <h2 id="modalTitle"></h2>
                 <p id="modalDescription"></p>
             </div>
             
-            <!-- ボタン（オプション） -->
             <div id="modalButtons" class="modal-buttons hidden">
                 <button class="modal-btn primary" onclick="handlePrimaryAction()">
                     詳細を見る
@@ -237,7 +191,10 @@
     </div>
 
     <script>
-        // URLパラメータを取得する関数
+        // --- 設定 ---
+        const LIFF_ID = '2008845690-xzhgSZKL';
+
+        // URLパラメータを取得
         function getUrlParams() {
             const params = new URLSearchParams(window.location.search);
             return {
@@ -249,20 +206,16 @@
             };
         }
 
-        // モーダルを閉じる関数
+        // モーダルを閉じる
         function closeModal() {
-            const modal = document.getElementById('modal');
-            modal.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                if (liff.isInClient()) {
-                    liff.closeWindow();
-                } else {
-                    modal.classList.add('hidden');
-                }
-            }, 300);
+            if (liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                document.getElementById('modal').classList.add('hidden');
+            }
         }
 
-        // プライマリーボタンのアクション
+        // ボタンアクション
         function handlePrimaryAction() {
             const params = getUrlParams();
             if (params.link) {
@@ -270,16 +223,6 @@
             } else {
                 closeModal();
             }
-        }
-
-        // 画像の読み込み
-        function loadImage(imageUrl) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(imageUrl);
-                img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
-                img.src = imageUrl;
-            });
         }
 
         // モーダルを表示
@@ -295,37 +238,34 @@
             const modalButtons = document.getElementById('modalButtons');
 
             try {
-                // 画像URLがない場合
                 if (!params.image) {
-                    throw new Error('画像URLが指定されていません');
+                    throw new Error('画像URLがありません');
                 }
 
-                // 画像を読み込み
-                await loadImage(params.image);
-                modalImage.src = params.image;
+                // 画像の読み込み完了を待つ
+                const img = new Image();
+                img.src = params.image;
+                img.onload = () => {
+                    modalImage.src = params.image;
+                    
+                    // テキスト設定
+                    if (params.title) {
+                        modalTitle.textContent = params.title;
+                        modalText.classList.remove('hidden');
+                    }
+                    if (params.description) {
+                        modalDescription.textContent = params.description;
+                        modalText.classList.remove('hidden');
+                    }
+                    if (params.button || params.link) {
+                        modalButtons.querySelector('.primary').textContent = params.button || '詳細を見る';
+                        modalButtons.classList.remove('hidden');
+                    }
 
-                // タイトルがあれば表示
-                if (params.title) {
-                    modalTitle.textContent = params.title;
-                    modalText.classList.remove('hidden');
-                }
-
-                // 説明文があれば表示
-                if (params.description) {
-                    modalDescription.textContent = params.description;
-                    modalText.classList.remove('hidden');
-                }
-
-                // ボタンテキストがあれば表示
-                if (params.button || params.link) {
-                    const btnText = params.button || '詳細を見る';
-                    modalButtons.querySelector('.primary').textContent = btnText;
-                    modalButtons.classList.remove('hidden');
-                }
-
-                // ローディングを非表示、モーダルを表示
-                loading.classList.add('hidden');
-                modal.classList.remove('hidden');
+                    loading.classList.add('hidden');
+                    modal.classList.remove('hidden');
+                };
+                img.onerror = () => { throw new Error('読み込み失敗'); };
 
             } catch (err) {
                 console.error(err);
@@ -338,37 +278,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('modal');
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
+                if (e.target === modal) closeModal();
             });
         });
 
         // LIFF初期化
         window.onload = async () => {
             try {
-                // ここにあなたのLIFF IDを入れてください
-                const liffId = '2008845690-xzhgSZKL';
-                await liff.init({ liffId });
-                
-                // モーダル表示
+                await liff.init({ liffId: LIFF_ID });
                 await showModal();
             } catch (err) {
                 console.error('LIFF初期化エラー:', err);
-                // LIFF初期化失敗でもモーダルは表示
                 await showModal();
             }
         };
-
-        // fadeOutアニメーション追加
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
